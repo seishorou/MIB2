@@ -4,18 +4,13 @@ on:
   workflow_dispatch:
   push:
     branches: [ "main", "master" ]
-    paths:
-      - "MIB_TicketPatch_Experimental.cs"
-      - "MIB_TicketPatch.csproj"
-      - "libs/**"
-      - ".github/workflows/build.yml"
 
 jobs:
   build:
     runs-on: windows-latest
 
     steps:
-      - name: Baixar repositório
+      - name: Baixar repositorio
         uses: actions/checkout@v4
 
       - name: Verificar bibliotecas
@@ -28,7 +23,7 @@ jobs:
 
           foreach ($file in $required) {
             if (-not (Test-Path $file)) {
-              throw "Arquivo obrigatório ausente: $file"
+              throw "Arquivo obrigatorio ausente: $file"
             }
           }
 
@@ -36,7 +31,7 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Compilar
-        run: msbuild MIB_TicketPatch.csproj /p:Configuration=Release /p:Platform=AnyCPU
+        run: msbuild MIB_TicketPatch.csproj /t:Build /p:Configuration=Release
 
       - name: Preparar pacote
         shell: powershell
@@ -46,11 +41,9 @@ jobs:
           if (Test-Path bin\Release\MIB_TicketPatch_Experimental.pdb) {
             Copy-Item bin\Release\MIB_TicketPatch_Experimental.pdb artifact\BepInEx\plugins\
           }
-          Copy-Item README.md artifact\
 
       - name: Publicar DLL
         uses: actions/upload-artifact@v4
         with:
           name: MIB_TicketPatch_Experimental
           path: artifact
-
