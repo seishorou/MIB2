@@ -1,1 +1,56 @@
+name: Compilar MIB Ticket Patch
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "master" ]
+    paths:
+      - "MIB_TicketPatch_Experimental.cs"
+      - "MIB_TicketPatch.csproj"
+      - "libs/**"
+      - ".github/workflows/build.yml"
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Baixar repositório
+        uses: actions/checkout@v4
+
+      - name: Verificar bibliotecas
+        shell: powershell
+        run: |
+          $required = @(
+            "libs\BepInEx.dll",
+            "libs\0Harmony.dll"
+          )
+
+          foreach ($file in $required) {
+            if (-not (Test-Path $file)) {
+              throw "Arquivo obrigatório ausente: $file"
+            }
+          }
+
+      - name: Configurar MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Compilar
+        run: msbuild MIB_TicketPatch.csproj /p:Configuration=Release /p:Platform=AnyCPU
+
+      - name: Preparar pacote
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force -Path artifact\BepInEx\plugins | Out-Null
+          Copy-Item bin\Release\MIB_TicketPatch_Experimental.dll artifact\BepInEx\plugins\
+          if (Test-Path bin\Release\MIB_TicketPatch_Experimental.pdb) {
+            Copy-Item bin\Release\MIB_TicketPatch_Experimental.pdb artifact\BepInEx\plugins\
+          }
+          Copy-Item README.md artifact\
+
+      - name: Publicar DLL
+        uses: actions/upload-artifact@v4
+        with:
+          name: MIB_TicketPatch_Experimental
+          path: artifact
 
