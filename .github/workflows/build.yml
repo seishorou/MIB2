@@ -19,7 +19,8 @@ jobs:
           $required = @(
             "libs\BepInEx.dll",
             "libs\0Harmony.dll",
-            "libs\UnityEngine.dll"
+            "libs\UnityEngine.dll",
+            "libs\UnityEngine.CoreModule.dll"
           )
 
           foreach ($file in $required) {
