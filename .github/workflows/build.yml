@@ -18,7 +18,8 @@ jobs:
         run: |
           $required = @(
             "libs\BepInEx.dll",
-            "libs\0Harmony.dll"
+            "libs\0Harmony.dll",
+            "libs\UnityEngine.dll"
           )
 
           foreach ($file in $required) {
