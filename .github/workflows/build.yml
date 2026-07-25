@@ -1,51 +1,31 @@
-name: Compilar MIB Ticket Patch
-
+name: Compilar MIB Ticket Patch v0.2
 on:
   workflow_dispatch:
   push:
     branches: [ "main", "master" ]
-
 jobs:
   build:
     runs-on: windows-latest
-
     steps:
       - name: Baixar repositorio
         uses: actions/checkout@v4
-
       - name: Verificar bibliotecas
         shell: powershell
         run: |
-          $required = @(
-            "libs\BepInEx.dll",
-            "libs\0Harmony.dll",
-            "libs\UnityEngine.dll",
-            "libs\UnityEngine.CoreModule.dll"
-          )
-
-          foreach ($file in $required) {
-            if (-not (Test-Path $file)) {
-              throw "Arquivo obrigatorio ausente: $file"
-            }
-          }
-
+          $required = @("libs\BepInEx.dll", "libs\0Harmony.dll", "libs\UnityEngine.dll", "libs\UnityEngine.CoreModule.dll")
+          foreach ($file in $required) { if (-not (Test-Path $file)) { throw "Arquivo obrigatorio ausente: $file" } }
       - name: Configurar MSBuild
         uses: microsoft/setup-msbuild@v2
-
       - name: Compilar
         run: msbuild MIB_TicketPatch.csproj /t:Build /p:Configuration=Release
-
       - name: Preparar pacote
         shell: powershell
         run: |
           New-Item -ItemType Directory -Force -Path artifact\BepInEx\plugins | Out-Null
           Copy-Item bin\Release\MIB_TicketPatch_Experimental.dll artifact\BepInEx\plugins\
-          if (Test-Path bin\Release\MIB_TicketPatch_Experimental.pdb) {
-            Copy-Item bin\Release\MIB_TicketPatch_Experimental.pdb artifact\BepInEx\plugins\
-          }
-
+          if (Test-Path bin\Release\MIB_TicketPatch_Experimental.pdb) { Copy-Item bin\Release\MIB_TicketPatch_Experimental.pdb artifact\BepInEx\plugins\ }
       - name: Publicar DLL
         uses: actions/upload-artifact@v4
         with:
-          name: MIB_TicketPatch_Experimental
+          name: MIB_TicketPatch_Experimental_v0.2
           path: artifact
